@@ -1,0 +1,43 @@
+<?php
+
+use App\Http\Controllers\HubController;
+use App\Http\Controllers\RuleController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SetupController;
+use App\Http\Controllers\TodoController;
+use Illuminate\Support\Facades\Route;
+
+/*
+ * Public site: Blade, cloud only. Self-hosted has nothing to sell, so `/`
+ * goes straight to the app. Checked per request so `route:cache` still works.
+ */
+Route::get('/', fn () => config('fleche.edition') === 'cloud'
+    ? view('landing')
+    : redirect('/app'))->name('home');
+
+Route::prefix('app')->group(function (): void {
+    Route::middleware('guest')->group(function (): void {
+        Route::get('setup', [SetupController::class, 'create'])->name('setup');
+        Route::post('setup', [SetupController::class, 'store'])->name('setup.store');
+    });
+
+    Route::middleware('auth')->group(function (): void {
+        Route::get('/', [TodoController::class, 'index'])->name('today');
+        Route::post('todos', [TodoController::class, 'store'])->name('todos.store');
+        Route::post('todos/{todo}/done', [TodoController::class, 'done'])->name('todos.done');
+
+        Route::resource('rules', RuleController::class)->except('show');
+
+        Route::get('hub', [HubController::class, 'index'])->name('hub');
+        Route::post('hub/{pack}/import', [HubController::class, 'import'])->whereNumber('pack')->name('hub.import');
+        Route::post('hub', [HubController::class, 'publish'])->name('hub.publish');
+        Route::patch('hub/{pack}', [HubController::class, 'moderate'])->name('hub.moderate');
+
+        Route::get('settings', [SettingsController::class, 'show'])->name('settings');
+        Route::put('settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');
+        Route::delete('settings/telegram', [SettingsController::class, 'disconnectTelegram'])->name('settings.telegram.disconnect');
+        Route::post('settings/tokens', [SettingsController::class, 'createToken'])->name('settings.tokens.store');
+        Route::delete('settings/tokens/{token}', [SettingsController::class, 'deleteToken'])->name('settings.tokens.destroy');
+        Route::post('settings/checkout', [SettingsController::class, 'checkout'])->name('settings.checkout');
+    });
+});

@@ -1,0 +1,12 @@
+.git
+node_modules
+vendor
+.env
+public/build
+public/hot
+storage/logs/*
+storage/framework/*/*
+database/*.sqlite
+resources/js/routes
+resources/js/actions
+resources/js/wayfinder

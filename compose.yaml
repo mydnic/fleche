@@ -1,0 +1,54 @@
+# Self-hosted Fleche. From a clone of this repository:
+#
+#   cp deploy/.env.example .env     # set APP_URL, DB_PASSWORD, TELEGRAM_*
+#   docker compose up -d
+name: fleche
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: deploy/Dockerfile
+        restart: unless-stopped
+        ports:
+            - '${APP_PORT:-80}:80'
+        env_file: .env
+        volumes:
+            - storage:/var/www/storage/app
+        depends_on:
+            pgsql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+
+    pgsql:
+        image: 'postgres:18-alpine'
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: '${DB_DATABASE:-fleche}'
+            POSTGRES_USER: '${DB_USERNAME:-fleche}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:?set DB_PASSWORD in .env}'
+        volumes:
+            - pgsql:/var/lib/postgresql
+        healthcheck:
+            test: ['CMD', 'pg_isready', '-U', '${DB_USERNAME:-fleche}', '-d', '${DB_DATABASE:-fleche}']
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    redis:
+        image: 'redis:8-alpine'
+        restart: unless-stopped
+        command: ['redis-server', '--appendonly', 'yes']
+        volumes:
+            - redis:/data
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+volumes:
+    pgsql:
+    redis:
+    storage:

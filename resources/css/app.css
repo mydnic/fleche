@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+@source '../views';
+
+@theme inline {
+    --font-sans: Nunito, ui-sans-serif, system-ui, sans-serif;
+    --font-display: Fredoka, Nunito, ui-sans-serif, sans-serif;
+    --font-pixel: 'Press Start 2P', ui-monospace, monospace;
+}
+
+:root {
+    --ui-bg: #fffaf3;
+}
+
+body {
+    background-color: #fffaf3;
+    background-image: radial-gradient(#fde7cf 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+}
+
+/* A chunky, toy-like shadow for cards and buttons. */
+.pop {
+    box-shadow: 0 4px 0 0 rgb(0 0 0 / 0.08);
+}

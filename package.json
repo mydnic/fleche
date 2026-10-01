@@ -1,0 +1,30 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.0",
+        "concurrently": "^10.0.3",
+        "laravel-vite-plugin": "^3.1",
+        "tailwindcss": "^4.0.0",
+        "vite": "^8.0.0"
+    },
+    "optionalDependencies": {
+        "@laravel/multiplex": "^0.4.1"
+    },
+    "dependencies": {
+        "@iconify-json/lucide": "^1.2.138",
+        "@inertiajs/vite": "^3.8.0",
+        "@inertiajs/vue3": "^3.8.0",
+        "@laravel/vite-plugin-wayfinder": "^0.1.10",
+        "@nuxt/ui": "^4.11.3",
+        "@vitejs/plugin-vue": "^6.0.9",
+        "typescript": "^5.9.3",
+        "vue": "^3.5.43",
+        "vue-tsc": "^3.3.11"
+    }
+}
