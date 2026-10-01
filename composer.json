@@ -48,8 +48,8 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
             "@php artisan migrate --force",
-            "npm install --ignore-scripts",
-            "npm run build"
+            "yarn install",
+            "yarn build"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
@@ -68,7 +68,7 @@
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
             "@lint:check",
-            "npm run types:check",
+            "yarn types:check",
             "@test"
         ],
         "post-autoload-dump": [

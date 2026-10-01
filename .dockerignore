@@ -10,3 +10,4 @@ database/*.sqlite
 resources/js/routes
 resources/js/actions
 resources/js/wayfinder
+.yarn

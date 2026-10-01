@@ -10,8 +10,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Node only to build the front end: `vite build` shells out to
 # `php artisan wayfinder:generate`, so it builds here and is thrown away below.
+# Corepack provides the Yarn version pinned by `packageManager`.
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
+    && npm install -g corepack \
+    && corepack enable \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -21,15 +24,15 @@ WORKDIR /var/www
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
 
-COPY package.json package-lock.json .npmrc ./
-RUN npm ci
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
 
 COPY . .
 
 RUN composer dump-autoload --optimize --classmap-authoritative \
     && php artisan package:discover \
-    && npm run build \
-    && rm -rf node_modules
+    && yarn build \
+    && rm -rf node_modules .yarn
 
 COPY deploy/nginx.conf /etc/nginx/sites-available/default
 COPY deploy/supervisord.conf /etc/supervisor/conf.d/fleche.conf

@@ -56,11 +56,16 @@ jobs:
           tools: composer:v2
           coverage: none
 
+      # Yarn 4 comes through Corepack, pinned by `packageManager` in
+      # package.json; enabled before setup-node, whose cache shells out to it.
+      - name: Enable Corepack
+        run: npm install -g corepack && corepack enable
+
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
-          cache: npm
+          cache: yarn
 
       # Also builds the front end, which generates the Wayfinder routes the
       # type check needs.

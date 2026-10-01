@@ -47,9 +47,10 @@ no undo), `todo-settings` CRUD.
 ## Develop
 
 ```sh
-composer install && npm install
+corepack enable              # Yarn 4, pinned in package.json
+composer install && yarn install
 cp .env.example .env && php artisan key:generate
 php artisan migrate --seed    # demo user test@example.com / password
-npm run dev
+yarn dev
 php artisan test
 ```
