@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 pest()->extend(TestCase::class)
@@ -22,8 +23,13 @@ function bootWithEnv(array $env): void
         putenv("{$key}={$value}");
     }
 
+    // Close the test's transaction before swapping apps (in-memory SQLite even
+    // shares its connection with the new one), then open a fresh one exactly
+    // like setUp does. A plain `migrate:fresh` would commit instead, and on
+    // Postgres its rows would leak into every later test.
+    DB::rollBack();
     test()->refreshApplication();
-    test()->artisan('migrate:fresh');
+    test()->refreshDatabase();
 
     foreach ($previous as $key => $value) {
         $_ENV[$key] = $_SERVER[$key] = $value;

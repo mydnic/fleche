@@ -31,7 +31,9 @@ services:
         volumes:
             - pgsql:/var/lib/postgresql
         healthcheck:
-            test: ['CMD', 'pg_isready', '-U', '${DB_USERNAME:-fleche}', '-d', '${DB_DATABASE:-fleche}']
+            # Over TCP: on first boot the image runs a socket-only temporary
+            # server for init, which a plain pg_isready reports as ready.
+            test: ['CMD', 'pg_isready', '-h', '127.0.0.1', '-U', '${DB_USERNAME:-fleche}', '-d', '${DB_DATABASE:-fleche}']
             interval: 5s
             timeout: 5s
             retries: 10

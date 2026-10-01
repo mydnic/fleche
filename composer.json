@@ -3,7 +3,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -55,6 +58,18 @@
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
             "@php artisan test"
+        ],
+        "lint": [
+            "pint --parallel"
+        ],
+        "lint:check": [
+            "pint --parallel --test"
+        ],
+        "ci:check": [
+            "Composer\\Config::disableProcessTimeout",
+            "@lint:check",
+            "npm run types:check",
+            "@test"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
