@@ -37,6 +37,10 @@ return [
 
     'mailers' => [
 
+        'cloudflare' => [
+            'transport' => 'cloudflare',
+        ],
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
