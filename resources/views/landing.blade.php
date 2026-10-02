@@ -19,6 +19,7 @@
             Fleche
         </a>
         <nav class="flex items-center gap-2 text-sm font-bold">
+            @include('partials.github-button')
             @auth
                 <a href="/app" class="rounded-xl bg-orange-500 px-4 py-2 text-white shadow-[0_3px_0_0_#c2410c] hover:bg-orange-600">Open app 🏹</a>
             @else

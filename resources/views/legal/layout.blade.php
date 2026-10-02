@@ -16,7 +16,10 @@
             <span class="grid size-9 rotate-[-8deg] place-items-center rounded-xl bg-orange-500 text-white shadow-[0_3px_0_0_#c2410c]">➚</span>
             Fleche
         </a>
+        <div class="flex items-center gap-2">
+        @include('partials.github-button')
         <a href="{{ auth()->check() ? '/app' : '/app/register' }}" class="rounded-xl bg-orange-500 px-4 py-2 text-sm font-bold text-white shadow-[0_3px_0_0_#c2410c] hover:bg-orange-600">{{ auth()->check() ? 'Open app' : 'Start free' }}</a>
+        </div>
     </header>
 
     <main class="mx-auto max-w-3xl px-4 pb-16">
