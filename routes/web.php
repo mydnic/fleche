@@ -5,6 +5,7 @@ use App\Http\Controllers\HubController;
 use App\Http\Controllers\RuleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SetupController;
+use App\Http\Controllers\StatsController;
 use App\Http\Controllers\TodoController;
 use App\Models\HubPack;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,8 @@ Route::prefix('app')->group(function (): void {
         Route::post('todos/{todo}/done', [TodoController::class, 'done'])->name('todos.done');
 
         Route::resource('rules', RuleController::class)->except('show');
+
+        Route::get('stats', [StatsController::class, 'index'])->name('stats');
 
         Route::get('hub', [HubController::class, 'index'])->name('hub');
         Route::post('hub/{pack}/import', [HubController::class, 'import'])->whereNumber('pack')->name('hub.import');

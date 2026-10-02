@@ -2,7 +2,7 @@
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { computed, watch } from 'vue'
 import Logo from '@/components/Logo.vue'
-import { hub, logout, settings, today } from '@/routes'
+import { hub, logout, settings, stats, today } from '@/routes'
 import rules from '@/routes/rules'
 
 const page = usePage()
@@ -12,6 +12,7 @@ const user = computed(() => page.props.auth.user!)
 const nav = computed(() => [
     { label: 'Today', icon: 'i-lucide-target', href: today.url(), active: page.url === today.url() || page.url.startsWith(today.url() + '?') },
     { label: 'Rules', icon: 'i-lucide-dices', href: rules.index.url(), active: page.url.startsWith(rules.index.url()) },
+    { label: 'Stats', icon: 'i-lucide-chart-column', href: stats.url(), active: page.url.startsWith(stats.url()) },
     { label: 'Hub', icon: 'i-lucide-store', href: hub.url(), active: page.url.startsWith(hub.url()) },
     { label: 'Settings', icon: 'i-lucide-settings', href: settings.url(), active: page.url.startsWith(settings.url()) }
 ])
@@ -68,7 +69,7 @@ watch(() => page.props.status, (status) => {
         </main>
 
         <!-- Phone: app-like bottom tabs (installable PWA). -->
-        <nav class="fixed inset-x-3 bottom-3 z-10 grid grid-cols-4 rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-orange-100 sm:hidden">
+        <nav class="fixed inset-x-3 bottom-3 z-10 grid grid-cols-5 rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-orange-100 sm:hidden">
             <Link
                 v-for="item in nav"
                 :key="item.label"
