@@ -44,10 +44,13 @@ class Hub
 
     /**
      * Fetches an approved pack and counts the import, crediting its author.
+     * The same importer (a user, or an IP for self-hosted instances) only
+     * counts once per pack, ever: the public endpoint can't be spammed to
+     * inflate a pack's ranking or its author's points.
      *
      * @return array<string, mixed>
      */
-    public function take(int $id): array
+    public function take(int $id, string $importer): array
     {
         if (! $this->local()) {
             return Http::timeout(10)->post(config('fleche.hub_url')."/api/hub/packs/{$id}/imports")->throw()->json();
@@ -55,9 +58,18 @@ class Hub
 
         $pack = HubPack::query()->where('status', HubPackStatus::Approved)->findOrFail($id);
 
-        DB::transaction(function () use ($pack): void {
-            $pack->increment('imports_count');
-            User::query()->whereKey($pack->user_id)->increment('points', config('fleche.hub_import_points'));
+        DB::transaction(function () use ($pack, $importer): void {
+            // The primary key makes this a no-op for a repeat importer.
+            $isNew = DB::table('hub_imports')->insertOrIgnore([
+                'hub_pack_id' => $pack->id,
+                'importer' => hash_hmac('sha256', $importer, (string) config('app.key')),
+                'created_at' => now(),
+            ]);
+
+            if ($isNew) {
+                $pack->increment('imports_count');
+                User::query()->whereKey($pack->user_id)->increment('points', config('fleche.hub_import_points'));
+            }
         });
 
         return $this->present($pack->load('user:id,name'));

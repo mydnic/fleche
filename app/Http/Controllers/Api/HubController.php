@@ -28,8 +28,8 @@ class HubController extends Controller
     /**
      * @return array<string, mixed>
      */
-    public function import(int $pack): array
+    public function import(Request $request, int $pack): array
     {
-        return $this->hub->take($pack);
+        return $this->hub->take($pack, 'ip:'.$request->ip());
     }
 }

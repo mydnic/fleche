@@ -73,6 +73,7 @@ it('keeps everything when self-hosted', function () {
 
 it('unlocks history when the Stripe checkout completes', function () {
     bootWithEnv(['APP_EDITION' => 'cloud']);
+    config(['cashier.webhook.secret' => 'whsec_test']);
     $user = User::factory()->create();
 
     event(new WebhookReceived(['type' => 'checkout.session.completed', 'data' => ['object' => [

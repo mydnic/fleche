@@ -48,7 +48,7 @@ class HubController extends Controller
     public function import(Request $request, int $pack): RedirectResponse
     {
         try {
-            $count = $this->hub->importInto($request->user(), $this->hub->take($pack));
+            $count = $this->hub->importInto($request->user(), $this->hub->take($pack, 'user:'.$request->user()->id));
         } catch (RequestException) {
             return back()->with('status', 'Could not import this pack.');
         }
