@@ -50,6 +50,22 @@ return [
             'report' => false,
         ],
 
+        // Cloudflare R2 (S3-compatible), what fleche.io stores pictures on:
+        // FILESYSTEM_DISK=r2. Reads R2_* and falls back to the AWS_* names.
+        // R2_URL is the bucket's public address (custom domain or r2.dev).
+        'r2' => [
+            'driver' => 's3',
+            'key' => env('R2_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('R2_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
+            'region' => 'auto',
+            'bucket' => env('R2_BUCKET', env('AWS_BUCKET')),
+            'url' => env('R2_URL', env('AWS_URL')),
+            'endpoint' => env('R2_ENDPOINT', env('AWS_ENDPOINT')),
+            'use_path_style_endpoint' => true,
+            'throw' => true,
+            'report' => false
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
