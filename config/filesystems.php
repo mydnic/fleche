@@ -63,7 +63,7 @@ return [
             'endpoint' => env('R2_ENDPOINT', env('AWS_ENDPOINT')),
             'use_path_style_endpoint' => true,
             'throw' => true,
-            'report' => false
+            'report' => false,
         ],
 
         's3' => [
