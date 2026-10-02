@@ -49,6 +49,7 @@ Route::prefix('app')->group(function (): void {
         Route::post('hub/{pack}/import', [HubController::class, 'import'])->whereNumber('pack')->name('hub.import');
         Route::post('hub', [HubController::class, 'publish'])->name('hub.publish');
         Route::patch('hub/{pack}', [HubController::class, 'moderate'])->name('hub.moderate');
+        Route::delete('hub/{pack}', [HubController::class, 'destroy'])->name('hub.destroy');
 
         Route::get('settings', [SettingsController::class, 'show'])->name('settings');
         Route::put('settings/notifications', [SettingsController::class, 'notifications'])->name('settings.notifications');

@@ -202,3 +202,25 @@ it('loads Rybbit on every cloud page, never on self-hosted', function () {
     }
     $this->actingAs(User::factory()->create())->get('/app')->assertSee($script, false);
 });
+
+it('lets only the cloud admin remove a pack from the hub', function () {
+    bootWithEnv(['APP_EDITION' => 'cloud']);
+    $author = User::factory()->create();
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+    $pack = HubPack::create(['user_id' => $author->id, 'name' => 'Spammy', 'rules' => [['name' => 'x']], 'status' => 'approved']);
+
+    $this->actingAs($author)->delete(route('hub.destroy', $pack))->assertForbidden();
+    expect(HubPack::count())->toBe(1);
+
+    $this->actingAs($admin)->delete(route('hub.destroy', $pack))->assertRedirect();
+    expect(HubPack::count())->toBe(0);
+});
+
+it('never lets a self-hosted admin delete packs', function () {
+    $admin = User::factory()->create();
+    $admin->forceFill(['is_admin' => true])->save();
+    $pack = HubPack::create(['user_id' => $admin->id, 'name' => 'Local', 'rules' => [['name' => 'x']], 'status' => 'approved']);
+
+    $this->actingAs($admin)->delete(route('hub.destroy', $pack))->assertForbidden();
+});

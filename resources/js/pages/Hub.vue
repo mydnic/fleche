@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Head, router, useForm } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { Head, router, useForm, usePage } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 import ImagePreview from '@/components/ImagePreview.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { describeRule } from '@/lib/rule'
 import { hub } from '@/routes'
-import { importMethod, moderate, publish } from '@/routes/hub'
+import { destroy, importMethod, moderate, publish } from '@/routes/hub'
 import type { HubPack } from '@/types'
 
 const props = defineProps<{
@@ -17,6 +17,15 @@ const props = defineProps<{
     mine: { id: number, name: string, status: string, imports_count: number }[]
     pending: HubPack[]
 }>()
+
+const page = usePage()
+const isAdmin = computed(() => page.props.edition === 'cloud' && page.props.auth.user?.is_admin === true)
+
+function remove (pack: HubPack): void {
+    if (confirm(`Remove "${pack.name}" from the hub? People who already imported it keep their rules.`)) {
+        router.delete(destroy.url(pack.id), { preserveScroll: true })
+    }
+}
 
 const search = ref(props.q)
 const publishing = ref(false)
@@ -230,14 +239,24 @@ const STATUS_COLOR = { pending: 'warning', approved: 'success', rejected: 'error
                         </span>
                     </li>
                 </ul>
-                <UButton
-                    class="mt-auto"
-                    block
-                    icon="i-lucide-download"
-                    :loading="importing === pack.id"
-                    :label="`Import ${pack.rules.length} rule${pack.rules.length > 1 ? 's' : ''}`"
-                    @click="take(pack)"
-                />
+                <div class="mt-auto flex gap-2">
+                    <UButton
+                        class="flex-1"
+                        block
+                        icon="i-lucide-download"
+                        :loading="importing === pack.id"
+                        :label="`Import ${pack.rules.length} rule${pack.rules.length > 1 ? 's' : ''}`"
+                        @click="take(pack)"
+                    />
+                    <UButton
+                        v-if="isAdmin"
+                        color="error"
+                        variant="soft"
+                        icon="i-lucide-trash-2"
+                        aria-label="Remove this pack from the hub"
+                        @click="remove(pack)"
+                    />
+                </div>
             </article>
         </div>
 

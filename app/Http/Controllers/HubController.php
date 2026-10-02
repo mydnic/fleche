@@ -85,12 +85,30 @@ class HubController extends Controller
 
     public function moderate(Request $request, HubPack $pack): RedirectResponse
     {
-        abort_unless(config('fleche.edition') === 'cloud' && $request->user()->is_admin, 403);
+        $this->authorizeAdmin($request);
 
         $pack->update($request->validate([
             'status' => ['required', Rule::enum(HubPackStatus::class)->except(HubPackStatus::Pending)],
         ]));
 
         return back();
+    }
+
+    /**
+     * Takes a pack off the hub for good. Rules already imported from it stay
+     * in their owners' accounts: those are copies.
+     */
+    public function destroy(Request $request, HubPack $pack): RedirectResponse
+    {
+        $this->authorizeAdmin($request);
+
+        $pack->delete();
+
+        return back()->with('status', "\"{$pack->name}\" removed from the hub.");
+    }
+
+    private function authorizeAdmin(Request $request): void
+    {
+        abort_unless(config('fleche.edition') === 'cloud' && $request->user()->is_admin, 403);
     }
 }
