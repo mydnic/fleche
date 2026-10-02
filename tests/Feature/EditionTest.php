@@ -3,6 +3,7 @@
 use App\Models\HubPack;
 use App\Models\Todo;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Database\Seeders\HubPackSeeder;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Handler\MockHandler;
@@ -10,6 +11,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Laravel\Cashier\Events\WebhookReceived;
 use NotificationChannels\Telegram\Telegram;
@@ -161,4 +163,19 @@ it('shows approved starter packs on the landing page, never pending ones', funct
         ->assertSee('Surprise Workout')
         ->assertSee('🎲 1 in 3')
         ->assertDontSee('Not reviewed yet');
+});
+
+it('keeps front-end routes relative when APP_URL is https, so the nav can match them', function () {
+    // The production build: https APP_URL, providers booted, then Wayfinder.
+    config(['app.url' => 'https://fleche.io']);
+    (new AppServiceProvider($this->app))->boot();
+    $path = sys_get_temp_dir().'/wayfinder-'.uniqid();
+
+    $this->artisan('wayfinder:generate', ['--path' => $path, '--skip-actions' => true])->assertSuccessful();
+
+    expect(file_get_contents("{$path}/routes/rules/index.ts"))
+        ->toContain("url: '/app/rules'")
+        ->not->toContain('https://fleche.io');
+
+    File::deleteDirectory($path);
 });
