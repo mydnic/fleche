@@ -190,6 +190,26 @@ curl -H "Authorization: Bearer $KEY" -H "Accept: application/json" \
 
 ---
 
+## Under the hood - How I built it - AI Disclaimer
+
+Whole project was finished in an hour, then I polished it for about one day. Here's my process:
+
+Now that AI is part of our lives, and dramatically impressives, every developer in the world use AI to build stuff now. So am I, and I'll explain how I did it.
+
+First of all, obviously as I mentioned, the core of the project was already done in a personal web app I made years ago.
+
+I told my claude agent (nanoclaw) about the Reddit comments and showed him my old app and I brainstormed really quickly if it was actually worth building another app. I dumped all the main ideas and the vision to him and asked him to make a complete list of detailed **User Stories**. Once every details were covered and agreed, he sent me the final document with all the User Stories.
+
+I then passed that document to claude code with Opus 5.5 and asked him to build the app in the github repo I prepared with a fresh, naked Laravel app. He built it really quickly and almost everything was done.
+
+Then I started testing the app myself and made feedbacks and corrections. I asked claude to do the archer, the animations, the "art direction" and design etc and he implemented all of it.
+
+Once the full app was working and was coherent with my vision, I started reviewing every line of code. Honestly there was not much to change, but I simplified a lot of stuff that he over engineered.
+
+Finally, I fixed the last few details by deploying a production instance and trying the self hosted deployment process.
+
+Conclusion : Heavily supervised claude coding with every line of code reviewed manually - design and animations ideas came from me but Claude coded it because... well it would have taken me weeks to make this archer shoot at stuff.
+
 ## Hack on it
 
 Laravel 13, Inertia + Vue, Nuxt UI, Tailwind, Pest. Postgres in production.
