@@ -9,6 +9,7 @@
         <link rel="apple-touch-icon" href="/icon-192.png">
 
         @fonts
+        @include('partials.analytics')
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>

@@ -9,6 +9,7 @@
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     @fonts
+    @include('partials.analytics')
     @vite(['resources/css/app.css', 'resources/js/landing.ts'])
 </head>
 <body class="cursor-crosshair font-sans antialiased text-stone-800">
@@ -135,6 +136,6 @@
         </section>
     </main>
 
-    <footer class="py-10 text-center text-sm text-stone-400">Fleche · made with 🏹 by <a href="https://mydnic.be" class="underline">mydnic</a></footer>
+    <footer class="py-10 text-center text-sm text-stone-400">Fleche · made with 🏹 by <a href="https://mydnic.be" class="underline">mydnic</a> · <a href="/privacy" class="underline">Privacy</a> · <a href="/terms" class="underline">Terms</a></footer>
 </body>
 </html>

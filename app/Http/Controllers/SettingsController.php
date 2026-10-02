@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DeleteAccount;
 use App\Actions\LinkTelegramChats;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -68,6 +70,21 @@ class SettingsController extends Controller
         $request->user()->tokens()->whereKey($token)->delete();
 
         return back();
+    }
+
+    public function destroyAccount(Request $request, DeleteAccount $deleteAccount): SymfonyResponse
+    {
+        $request->validate(['password' => ['required', 'current_password']]);
+
+        $user = $request->user();
+
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        $deleteAccount->handle($user);
+
+        return Inertia::location('/');
     }
 
     public function checkout(Request $request): SymfonyResponse

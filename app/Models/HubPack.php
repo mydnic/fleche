@@ -11,13 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * A rule or pack of rules shared on the community hub (cloud only).
  *
  * @property int $id
- * @property int $user_id
+ * @property int|null $user_id null once the author deleted their account
  * @property string $name
  * @property string|null $description
  * @property array<int, array<string, mixed>> $rules
  * @property HubPackStatus $status
  * @property int $imports_count
- * @property-read User $user
+ * @property-read User|null $user
  */
 #[Fillable(['user_id', 'name', 'description', 'rules', 'status'])]
 class HubPack extends Model

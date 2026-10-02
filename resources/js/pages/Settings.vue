@@ -3,6 +3,7 @@ import { Form, Head, router, useForm, usePage, usePoll } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { checkout, notifications } from '@/routes/settings'
+import { destroy as destroyAccount } from '@/routes/settings/account'
 import { disconnect } from '@/routes/settings/telegram'
 import tokens from '@/routes/settings/tokens'
 import userPassword from '@/routes/user-password'
@@ -46,6 +47,13 @@ watch(() => user.value.telegram_chat_id, (chatId) => {
         telegramPoll.stop()
     }
 })
+
+const deleting = ref(false)
+const deletion = useForm({ password: '' })
+
+function deleteAccount (): void {
+    deletion.delete(destroyAccount.url(), { preserveScroll: true, onError: () => deletion.reset('password') })
+}
 
 const HOURS = Array.from({ length: 24 }, (_, h) => ({ label: `${String(h).padStart(2, '0')}:00`, value: h }))
 
@@ -361,6 +369,67 @@ const curl = computed(() => `curl -H "Authorization: Bearer ${props.newToken ?? 
                     </div>
                 </details>
             </section>
+
+            <section class="rounded-3xl border-2 border-dashed border-red-200 bg-white/60 p-5">
+                <h2 class="text-xl font-bold">
+                    🗑️ Delete my account
+                </h2>
+                <p class="mt-1 text-sm text-stone-500">
+                    Removes your account, todos, rules, pictures and API keys for good. Packs you shared on the hub stay, without your name.
+                </p>
+                <UButton
+                    v-if="!deleting"
+                    class="mt-3"
+                    color="error"
+                    variant="soft"
+                    label="Delete my account"
+                    @click="deleting = true"
+                />
+                <form
+                    v-else
+                    class="mt-3 flex flex-wrap items-start gap-2"
+                    @submit.prevent="deleteAccount"
+                >
+                    <UFormField
+                        :error="deletion.errors.password"
+                        class="min-w-56 flex-1"
+                    >
+                        <UInput
+                            v-model="deletion.password"
+                            type="password"
+                            autocomplete="current-password"
+                            placeholder="Your password, to confirm"
+                            class="w-full"
+                            autofocus
+                        />
+                    </UFormField>
+                    <UButton
+                        type="submit"
+                        color="error"
+                        :loading="deletion.processing"
+                        label="Delete everything"
+                    />
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
+                        label="Cancel"
+                        @click="deleting = false"
+                    />
+                </form>
+            </section>
+
+            <p
+                v-if="cloud"
+                class="pb-4 text-center text-xs text-stone-400"
+            >
+                <a
+                    href="/privacy"
+                    class="underline"
+                >Privacy</a> · <a
+                    href="/terms"
+                    class="underline"
+                >Terms</a>
+            </p>
         </div>
     </AppLayout>
 </template>

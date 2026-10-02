@@ -25,6 +25,13 @@ Route::get('/', fn () => config('fleche.edition') === 'cloud'
     ])
     : redirect('/app'))->name('home');
 
+// Legal pages describe fleche.io; a self-hosted operator writes their own.
+foreach (['privacy', 'terms'] as $page) {
+    Route::get($page, fn () => config('fleche.edition') === 'cloud'
+        ? view("legal.{$page}")
+        : redirect('/app'))->name($page);
+}
+
 Route::prefix('app')->group(function (): void {
     Route::middleware('guest')->group(function (): void {
         Route::get('setup', [SetupController::class, 'create'])->name('setup');
@@ -49,5 +56,6 @@ Route::prefix('app')->group(function (): void {
         Route::post('settings/tokens', [SettingsController::class, 'createToken'])->name('settings.tokens.store');
         Route::delete('settings/tokens/{token}', [SettingsController::class, 'deleteToken'])->name('settings.tokens.destroy');
         Route::post('settings/checkout', [SettingsController::class, 'checkout'])->name('settings.checkout');
+        Route::delete('settings/account', [SettingsController::class, 'destroyAccount'])->name('settings.account.destroy');
     });
 });

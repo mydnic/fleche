@@ -179,3 +179,26 @@ it('keeps front-end routes relative when APP_URL is https, so the nav can match 
 
     File::deleteDirectory($path);
 });
+
+it('serves the legal pages on cloud only', function () {
+    $this->get('/privacy')->assertRedirect('/app');
+    $this->get('/terms')->assertRedirect('/app');
+
+    bootWithEnv(['APP_EDITION' => 'cloud']);
+
+    $this->get('/privacy')->assertOk()->assertSee('My Dynamic Production SRL')->assertSee('dataprotectionauthority.be');
+    $this->get('/terms')->assertOk()->assertSee('14 days')->assertSee('Belgian law');
+});
+
+it('loads Rybbit on every cloud page, never on self-hosted', function () {
+    $script = 'https://rybbit.dricle.be/api/script.js';
+
+    $this->actingAs(User::factory()->create())->get('/app')->assertDontSee($script);
+
+    bootWithEnv(['APP_EDITION' => 'cloud']);
+
+    foreach (['/', '/privacy', '/terms'] as $page) {
+        $this->get($page)->assertSee('<script src="'.$script.'" data-site-id="38" defer></script>', false);
+    }
+    $this->actingAs(User::factory()->create())->get('/app')->assertSee($script, false);
+});

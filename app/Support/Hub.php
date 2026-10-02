@@ -92,7 +92,7 @@ class Hub
             'id' => $pack->id,
             'name' => $pack->name,
             'description' => $pack->description,
-            'author' => $pack->user->name,
+            'author' => $pack->user->name ?? 'A former archer',
             'rules' => $pack->rules,
             'imports_count' => $pack->imports_count,
         ];

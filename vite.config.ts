@@ -23,6 +23,10 @@ export default defineConfig({
         ui({
             router: 'inertia',
             colorMode: false,
+            // Icons ship in the bundle (from @iconify-json/lucide) instead of
+            // being fetched from api.iconify.design: no visitor IP sent to a
+            // third party, nothing to declare in the privacy policy.
+            icon: { clientBundle: { scan: true } },
             ui: {
                 colors: {
                     primary: 'orange',
