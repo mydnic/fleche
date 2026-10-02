@@ -310,6 +310,7 @@ function destroy (): void {
                         :min="0.1"
                         :max="100"
                         :step="1"
+                        :step-snapping="false"
                         :format-options="{ maximumFractionDigits: 1 }"
                         class="w-32"
                     />
