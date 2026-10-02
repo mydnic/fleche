@@ -116,6 +116,69 @@ class TodoSetting extends Model
     }
 
     /**
+     * A short human summary of a rule's attributes, e.g. "weekdays · 1 in 3
+     * chance". Mirrors `describeRule()` in resources/js/lib/rule.ts, for the
+     * Blade landing page.
+     *
+     * @param  array<string, mixed>  $rule
+     */
+    public static function describe(array $rule, bool $withChance = true): string
+    {
+        $days = $rule['days'] ?? [];
+        $random = (bool) ($rule['random_day'] ?? false);
+        $months = $rule['months'] ?? [];
+        $sameSet = fn (array $a, array $b): bool => count($a) === count($b) && array_diff($b, $a) === [];
+        $parts = [];
+
+        if ($days !== []) {
+            $short = fn (string $day): string => ucfirst(substr($day, 0, 3));
+            $parts[] = match (true) {
+                $sameSet($days, array_slice(self::WEEKDAYS, 0, 5)) => $random ? 'one weekday' : 'weekdays',
+                $sameSet($days, ['saturday', 'sunday']) => $random ? 'Sat or Sun' : 'weekends',
+                default => ($random ? 'one of ' : '').implode($random ? ' or ' : ', ', array_map($short, $days)),
+            };
+        }
+
+        if (isset($rule['day_of_month'])) {
+            $parts[] = $rule['day_of_month'] === -1 ? 'last day of the month' : 'on the '.date('jS', mktime(0, 0, 0, 1, $rule['day_of_month']));
+        }
+
+        if ($months !== []) {
+            sort($months);
+            $name = fn (int $month): string => date('M', mktime(0, 0, 0, $month, 1));
+            $contiguous = count($months) > 2 && end($months) - $months[0] === count($months) - 1;
+
+            $parts[] = match (true) {
+                $sameSet($months, [1, 4, 7, 10]) => 'every quarter',
+                $contiguous => $name($months[0]).'–'.$name(end($months)),
+                default => 'in '.implode(', ', array_map($name, $months)),
+            };
+        }
+
+        if (! empty($rule['every_value']) && ! empty($rule['every_unit'])) {
+            $value = (int) $rule['every_value'];
+            $parts[] = 'at most every '.($value === 1 ? $rule['every_unit'] : "{$value} {$rule['every_unit']}s");
+        }
+
+        if ($withChance && ($rule['chance'] ?? 1) < 1) {
+            $parts[] = self::describeChance($rule['chance']).' chance';
+        }
+
+        return $parts === [] ? 'every day' : implode(' · ', $parts);
+    }
+
+    /**
+     * "1 in 3" when the odds are a clean fraction, "75%" otherwise. Mirrors
+     * `describeChance()` in resources/js/lib/rule.ts.
+     */
+    public static function describeChance(float $chance): string
+    {
+        $oneIn = 1 / $chance;
+
+        return abs($oneIn - round($oneIn)) / $oneIn < 0.02 ? '1 in '.round($oneIn) : round($chance * 100).'%';
+    }
+
+    /**
      * Whether the calendar rules and the dice let a todo appear on `$day`.
      * Does not look at points: that is the generator's job, atomically.
      */

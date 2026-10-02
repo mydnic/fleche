@@ -169,3 +169,39 @@ it('does not overflow months: a month before March 31st is February 28th', funct
 
     expect($rule->isDueOn(CarbonImmutable::parse('2026-03-31')))->toBeFalse();
 });
+
+it('summarizes a rule for humans', function (array $rule, string $summary) {
+    expect(TodoSetting::describe($rule))->toBe($summary);
+})->with([
+    'nothing' => [[], 'every day'],
+    'weekdays' => [['days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']], 'weekdays'],
+    'one weekend day' => [['days' => ['saturday', 'sunday'], 'random_day' => true], 'Sat or Sun'],
+    'some days' => [['days' => ['tuesday', 'friday']], 'Tue, Fri'],
+    'last day' => [['day_of_month' => -1], 'last day of the month'],
+    'quarterly' => [['day_of_month' => 1, 'months' => [1, 4, 7, 10]], 'on the 1st · every quarter'],
+    'season' => [['months' => [3, 4, 5, 6, 7, 8, 9]], 'Mar–Sep'],
+    'scattered months' => [['months' => [12, 6]], 'in Jun, Dec'],
+    'interval' => [['every_value' => 2, 'every_unit' => 'week', 'chance' => 0.5], 'at most every 2 weeks · 1 in 2 chance'],
+    'monthly' => [['every_value' => 1, 'every_unit' => 'month'], 'at most every month'],
+]);
+
+it('words the odds as "1 in N" when clean, as a percentage otherwise', function (float $chance, string $label) {
+    expect(TodoSetting::describeChance($chance))->toBe($label);
+})->with([
+    'a third' => [1 / 3, '1 in 3'],
+    'a third, as stored' => [0.3333, '1 in 3'],
+    'a seventh, as stored' => [0.1429, '1 in 7'],
+    'three quarters' => [0.75, '75%'],
+    'odd percentage' => [0.15, '15%'],
+    'half' => [0.5, '1 in 2'],
+]);
+
+it('accepts any odds between 0 and 1, like 3 in 4', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post(route('rules.store'), ['name' => 'Most days', 'chance' => 0.75])->assertSessionHasNoErrors();
+    $this->actingAs($user)->post(route('rules.store'), ['name' => 'Never', 'chance' => 0])->assertSessionHasErrors('chance');
+    $this->actingAs($user)->post(route('rules.store'), ['name' => 'Twice', 'chance' => 1.5])->assertSessionHasErrors('chance');
+
+    expect($user->todoSettings()->sole()->chance)->toBe(0.75);
+});

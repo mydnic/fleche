@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { describeRule } from '@/lib/rule'
+import { describeChance, describeRule } from '@/lib/rule'
 import ruleRoutes from '@/routes/rules'
 import type { Rule } from '@/types'
 
@@ -22,7 +22,7 @@ function toggle (rule: Rule & { id: number }, active: boolean): void {
                     Rules
                 </h1>
                 <p class="text-stone-500">
-                    Each night, every rule rolls its dice and maybe drops a todo in your list.
+                    When your day starts, every rule rolls its dice and maybe drops a todo in your list.
                 </p>
             </div>
             <UButton
@@ -42,7 +42,7 @@ function toggle (rule: Rule & { id: number }, active: boolean): void {
                 No rules yet
             </p>
             <p class="mt-1 text-sm text-stone-500">
-                Try "Take out the trash every Wednesday", or "Say I love you, 1 in 7 chance". Or grab a pack from the hub.
+                Try "Bins out every Tuesday", or "Plank for a minute, 1 in 3 chance". Or grab a ready-made pack from the hub.
             </p>
         </div>
 
@@ -88,7 +88,7 @@ function toggle (rule: Rule & { id: number }, active: boolean): void {
                         color="primary"
                         variant="soft"
                         icon="i-lucide-dices"
-                        :label="`${Math.round(Number(rule.chance) * 100)}%`"
+                        :label="describeChance(Number(rule.chance))"
                     />
                     <UBadge
                         v-if="rule.allow_duplicates"

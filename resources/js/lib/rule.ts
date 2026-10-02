@@ -11,8 +11,7 @@ export function describeRule (rule: Partial<Rule>): string {
     const parts: string[] = []
 
     if (rule.days?.length) {
-        const days = rule.days.map(day => DAY_SHORT[day]).join(rule.random_day ? ' or ' : ', ')
-        parts.push(rule.random_day ? `one of ${days}` : days)
+        parts.push(describeDays(rule.days, rule.random_day ?? false))
     }
 
     if (rule.day_of_month) {
@@ -20,7 +19,7 @@ export function describeRule (rule: Partial<Rule>): string {
     }
 
     if (rule.months?.length) {
-        parts.push(`in ${rule.months.map(month => MONTH_SHORT[month - 1]).join(', ')}`)
+        parts.push(describeMonths(rule.months))
     }
 
     if (rule.every_value && rule.every_unit) {
@@ -32,10 +31,55 @@ export function describeRule (rule: Partial<Rule>): string {
     }
 
     if (rule.chance !== undefined && Number(rule.chance) < 1) {
-        parts.push(`1 in ${Math.round(1 / Number(rule.chance))} chance`)
+        parts.push(`${describeChance(Number(rule.chance))} chance`)
     }
 
     return parts.length ? parts.join(' · ') : 'every day'
+}
+
+const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+const WEEKEND = ['saturday', 'sunday']
+
+/**
+ * "1 in 3" when the odds are a clean fraction, "75%" otherwise. Mirrors
+ * TodoSetting::describeChance().
+ */
+export function describeChance (chance: number): string {
+    const oneIn = 1 / chance
+
+    return Math.abs(oneIn - Math.round(oneIn)) / oneIn < 0.02 ? `1 in ${Math.round(oneIn)}` : `${Math.round(chance * 100)}%`
+}
+
+function describeDays (days: string[], randomDay: boolean): string {
+    if (sameSet(days, WEEKDAYS)) {
+        return randomDay ? 'one weekday' : 'weekdays'
+    }
+
+    if (sameSet(days, WEEKEND)) {
+        return randomDay ? 'Sat or Sun' : 'weekends'
+    }
+
+    const names = days.map(day => DAY_SHORT[day]).join(randomDay ? ' or ' : ', ')
+
+    return randomDay ? `one of ${names}` : names
+}
+
+function describeMonths (months: number[]): string {
+    const sorted = [...months].sort((a, b) => a - b)
+
+    if (sameSet(sorted, [1, 4, 7, 10])) {
+        return 'every quarter'
+    }
+
+    const contiguous = sorted.length > 2 && sorted.every((month, i) => i === 0 || month === sorted[i - 1] + 1)
+
+    return contiguous
+        ? `${MONTH_SHORT[sorted[0] - 1]}–${MONTH_SHORT[sorted[sorted.length - 1] - 1]}`
+        : `in ${sorted.map(month => MONTH_SHORT[month - 1]).join(', ')}`
+}
+
+function sameSet<T> (a: T[], b: T[]): boolean {
+    return a.length === b.length && b.every(item => a.includes(item))
 }
 
 function ordinal (n: number): string {

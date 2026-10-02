@@ -18,7 +18,6 @@
             Fleche
         </a>
         <nav class="flex items-center gap-2 text-sm font-bold">
-            <a href="#pricing" class="hidden rounded-xl px-3 py-2 hover:bg-orange-50 sm:block">Pricing</a>
             @auth
                 <a href="/app" class="rounded-xl bg-orange-500 px-4 py-2 text-white shadow-[0_3px_0_0_#c2410c] hover:bg-orange-600">Open app 🏹</a>
             @else
@@ -33,7 +32,7 @@
             <div>
                 <p class="mb-3 inline-block rounded-full bg-amber-200 px-3 py-1 text-xs font-extrabold tracking-wide text-amber-900 uppercase">Your todo list, with dice</p>
                 <h1 class="text-5xl leading-[1.05] font-bold sm:text-6xl">Todos that <span class="text-orange-500">show up</span> on their own.</h1>
-                <p class="mt-5 text-lg text-stone-600">"Take out the trash every Wednesday." "Stretch, 1 in 3 chance." "Eat some cake on Saturday, if you've earned 50 points." Write the rules once. Fleche fills your list every morning.</p>
+                <p class="mt-5 text-lg text-stone-600">"Bins out every Tuesday." "Plank for a minute, 1 in 3 chance." "Pizza night on Friday, if you've earned 60 points." Write the rules once. Fleche fills your list every morning.</p>
                 <div class="mt-8 grid max-w-md grid-cols-2 gap-3">
                     <a href="{{ auth()->check() ? '/app' : '/app/register' }}" class="rounded-2xl border-2 border-orange-500 bg-orange-500 px-4 py-3 text-center text-lg font-bold text-white shadow-[0_4px_0_0_#c2410c] hover:bg-orange-600">{{ auth()->check() ? 'Open my todos' : 'Start free' }} 🏹</a>
                     <a href="https://github.com/mydnic/fleche" class="rounded-2xl border-2 border-stone-200 bg-white px-4 py-3 text-center text-lg font-bold shadow-[0_4px_0_0_rgb(0_0_0/0.06)] hover:border-orange-300">Self-host it</a>
@@ -59,6 +58,37 @@
             @endforeach
         </section>
 
+        @if ($packs->isNotEmpty())
+            <section class="mx-auto max-w-5xl px-4 py-10">
+                <h2 class="text-center text-4xl font-bold">Start with a pack</h2>
+                <p class="mt-2 text-center text-stone-600">Ready-made rules, one click to import, yours to tweak. 🎲 = the dice decide.</p>
+                <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($packs as $pack)
+                        <div class="rounded-3xl border-2 border-sky-100 bg-white p-5 shadow-[0_4px_0_0_rgb(0_0_0/0.06)]">
+                            <h3 class="text-lg leading-tight font-bold">{{ $pack->name }}</h3>
+                            <p class="mt-1 text-sm text-stone-600">{{ $pack->description }}</p>
+                            <ul class="mt-3 space-y-1 text-sm">
+                                @foreach ($pack->rules as $rule)
+                                    <li class="flex items-center justify-between gap-2 rounded-lg bg-sky-50 px-2 py-1">
+                                        <span>
+                                            <span class="block leading-tight font-semibold">{{ $rule['name'] }}</span>
+                                            <span class="block text-xs text-stone-500">{{ \App\Models\TodoSetting::describe($rule, withChance: false) }}</span>
+                                        </span>
+                                        @if (isset($rule['reward_cost']))
+                                            <span class="shrink-0 text-xs font-bold text-sky-700">🎁 {{ $rule['reward_cost'] }} ★</span>
+                                        @elseif (($rule['chance'] ?? 1) < 1)
+                                            <span class="shrink-0 text-xs font-bold text-orange-600">🎲 {{ \App\Models\TodoSetting::describeChance($rule['chance']) }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="mt-6 text-center"><a href="{{ auth()->check() ? '/app/hub' : '/app/register' }}" class="font-bold text-orange-600 underline">Browse them all in the hub →</a></p>
+            </section>
+        @endif
+
         <section class="mx-auto max-w-5xl px-4 py-10">
             <div class="grid gap-4 rounded-3xl bg-sky-100 p-8 sm:grid-cols-3">
                 <div><h3 class="text-xl font-bold">☀️ Morning list</h3><p class="mt-1 text-sm text-stone-700">By email or Telegram, at the hour you pick.</p></div>
@@ -73,7 +103,7 @@
             <div class="mt-8 grid gap-4 md:grid-cols-3">
                 <div class="rounded-3xl border-2 border-orange-100 bg-white p-6">
                     <h3 class="text-xl font-bold">Free</h3>
-                    <p class="mt-1 text-3xl font-bold">€0</p>
+                    <p class="mt-1 text-3xl font-bold">$0</p>
                     <ul class="mt-4 space-y-2 text-sm text-stone-600">
                         <li>✓ Unlimited rules & todos</li><li>✓ Points, rewards, hub</li><li>✓ Email & Telegram</li><li>⏳ History kept 7 days</li>
                     </ul>

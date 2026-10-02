@@ -77,7 +77,7 @@ const STATUS_COLOR = { pending: 'warning', approved: 'success', rejected: 'error
             >
                 <UInput
                     v-model="form.name"
-                    placeholder="Stretching pack"
+                    placeholder="Desk Survival Kit"
                     class="w-full"
                 />
             </UFormField>
@@ -164,7 +164,7 @@ const STATUS_COLOR = { pending: 'warning', approved: 'success', rejected: 'error
             <UInput
                 v-model="search"
                 icon="i-lucide-search"
-                placeholder="Search packs: stretching, chores, plants…"
+                placeholder="Search packs: workout, money, plants…"
                 size="xl"
                 class="w-full"
             />
@@ -189,6 +189,7 @@ const STATUS_COLOR = { pending: 'warning', approved: 'success', rejected: 'error
                         {{ pack.name }}
                     </h3>
                     <UBadge
+                        v-if="pack.imports_count > 0"
                         color="secondary"
                         variant="soft"
                         icon="i-lucide-download"

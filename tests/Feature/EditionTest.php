@@ -3,6 +3,7 @@
 use App\Models\HubPack;
 use App\Models\Todo;
 use App\Models\User;
+use Database\Seeders\HubPackSeeder;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -148,4 +149,16 @@ it('links the chat when the waiting Settings page polls', function () {
         ->and($user->telegram_link_token)->toBeNull()
         ->and(Cache::get('telegram-offset'))->toBe(6)
         ->and(collect($sent)->map(fn ($call) => basename($call['request']->getUri()->getPath()))->all())->toBe(['getUpdates', 'sendMessage']);
+});
+
+it('shows approved starter packs on the landing page, never pending ones', function () {
+    bootWithEnv(['APP_EDITION' => 'cloud']);
+    $this->seed(HubPackSeeder::class);
+    HubPack::create(['user_id' => User::factory()->create()->id, 'name' => 'Not reviewed yet', 'rules' => [['name' => 'x']]]);
+
+    $this->get('/')->assertOk()
+        ->assertSee('Start with a pack')
+        ->assertSee('Surprise Workout')
+        ->assertSee('🎲 1 in 3')
+        ->assertDontSee('Not reviewed yet');
 });

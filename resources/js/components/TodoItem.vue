@@ -198,9 +198,11 @@ function check (): void {
     to { right: calc(100% - 3.5rem); }
 }
 
+/* Mirrors `fly` plus half the arrow's width: the trail always ends under the
+   arrow's shaft, never with a gap behind it. */
 @keyframes trail {
-    from { width: 0; }
-    to { width: calc(100% - 2.75rem); }
+    from { width: 3.85rem; }
+    to { width: calc(100% - 2.25rem); }
 }
 
 @keyframes thunk {

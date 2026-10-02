@@ -12,7 +12,17 @@ const WEEKDAYS: Weekday[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'frid
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const UNITS = [{ label: 'days', value: 'day' }, { label: 'weeks', value: 'week' }, { label: 'months', value: 'month' }, { label: 'years', value: 'year' }]
 const DAYS_OF_MONTH = [{ label: 'Any day', value: null }, ...Array.from({ length: 31 }, (_, i) => ({ label: String(i + 1), value: i + 1 })), { label: 'Last day', value: -1 }]
-const ODDS = [1, 2, 3, 4, 7, 10, 30]
+/** One tap for the usual odds; anything else goes in the % field. */
+const PRESETS = [
+    { label: 'Always', chance: 1 },
+    { label: '3 in 4', chance: 3 / 4 },
+    { label: '1 in 2', chance: 1 / 2 },
+    { label: '1 in 3', chance: 1 / 3 },
+    { label: '1 in 4', chance: 1 / 4 },
+    { label: '1 in 7', chance: 1 / 7 },
+    { label: '1 in 10', chance: 1 / 10 },
+    { label: '1 in 30', chance: 1 / 30 }
+]
 
 const form = useForm<Rule & { image: File | null, remove_image: boolean }>({
     image: null,
@@ -33,11 +43,13 @@ const form = useForm<Rule & { image: File | null, remove_image: boolean }>({
     reward_cost: props.rule?.reward_cost ?? null,
 })
 
-/** Shown as "1 in N", stored as a probability. */
-const odds = computed({
-    get: () => Math.max(1, Math.round(1 / (form.chance || 1))),
-    set: (n: number) => (form.chance = 1 / Math.max(1, Number(n) || 1))
+/** Edited as a percentage, stored as a probability (0..1]. */
+const percent = computed({
+    get: () => Math.round(form.chance * 1000) / 10,
+    set: (value: number) => (form.chance = Math.min(100, Math.max(0.1, Number(value) || 100)) / 100)
 })
+
+const isPreset = (chance: number): boolean => Math.abs(form.chance - chance) < 0.0005
 
 const isReward = computed({
     get: () => form.reward_cost !== null,
@@ -120,7 +132,7 @@ function destroy (): void {
                 >
                     <UInput
                         v-model="form.name"
-                        placeholder="Take out the trash"
+                        placeholder="Water the plants"
                         size="xl"
                         class="w-full"
                         autofocus
@@ -277,25 +289,29 @@ function destroy (): void {
                     🎲 Chance
                 </h2>
                 <p class="text-sm text-stone-500">
-                    On a matching day, roll the dice. Great for surprises: "1 in 7" ≈ once a week, never on a fixed day.
+                    On a matching day, roll the dice. Great for surprises.
                 </p>
                 <div class="flex flex-wrap items-center gap-2">
                     <button
-                        v-for="n in ODDS"
-                        :key="n"
+                        v-for="preset in PRESETS"
+                        :key="preset.label"
                         type="button"
                         class="rounded-xl border-2 px-3 py-1.5 text-sm font-bold transition"
-                        :class="odds === n ? 'border-orange-500 bg-orange-500 text-white' : 'border-stone-200 hover:border-orange-300'"
-                        @click="odds = n"
+                        :class="isPreset(preset.chance) ? 'border-orange-500 bg-orange-500 text-white' : 'border-stone-200 hover:border-orange-300'"
+                        @click="form.chance = preset.chance"
                     >
-                        {{ n === 1 ? 'Always' : `1 in ${n}` }}
+                        {{ preset.label }}
                     </button>
-                    <span class="ml-2 text-sm text-stone-500">or 1 in</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-stone-500">
+                    or exactly
                     <UInputNumber
-                        v-model="odds"
-                        :min="1"
-                        :max="10000"
-                        class="w-28"
+                        v-model="percent"
+                        :min="0.1"
+                        :max="100"
+                        :step="1"
+                        :format-options="{ maximumFractionDigits: 1 }"
+                        class="w-32"
                     />
                 </div>
                 <p

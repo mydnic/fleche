@@ -1,10 +1,12 @@
 <?php
 
+use App\Enums\HubPackStatus;
 use App\Http\Controllers\HubController;
 use App\Http\Controllers\RuleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SetupController;
 use App\Http\Controllers\TodoController;
+use App\Models\HubPack;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,7 +14,15 @@ use Illuminate\Support\Facades\Route;
  * goes straight to the app. Checked per request so `route:cache` still works.
  */
 Route::get('/', fn () => config('fleche.edition') === 'cloud'
-    ? view('landing')
+    ? view('landing', [
+        // The fastest way to show what rules can do: real packs, ready to import.
+        'packs' => HubPack::query()
+            ->where('status', HubPackStatus::Approved)
+            ->orderByDesc('imports_count')
+            ->oldest('id')
+            ->limit(6)
+            ->get(),
+    ])
     : redirect('/app'))->name('home');
 
 Route::prefix('app')->group(function (): void {

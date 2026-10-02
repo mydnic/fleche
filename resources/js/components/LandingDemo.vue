@@ -15,10 +15,10 @@ const sample = (id: number, name: string, points: number, description: string | 
 })
 
 const todos = [
-    sample(1, 'Take out the trash', 2, 'Every Wednesday'),
-    sample(2, 'Water the plants 🌱', 2, 'At most every week · 1 in 2 chance'),
-    sample(3, 'Tell them "I love you" 🎲', 3, '1 in 7 chance'),
-    sample(4, 'Eat some cake 🎁', 0, 'Reward · showed up because you had 50 ★')
+    sample(1, 'Bins out tonight 🗑️', 1, 'Every Tuesday'),
+    sample(2, 'Plank for 60 seconds 💪', 3, '1 in 3 chance · today was the day'),
+    sample(3, 'Send this month\'s invoices 💸', 5, 'Last day of every month'),
+    sample(4, 'Pizza night 🍕', 0, 'Reward · unlocked with 60 ★')
 ]
 
 const points = ref(120)
