@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import ImagePreview from '@/components/ImagePreview.vue'
 import PixelArcher from '@/components/PixelArcher.vue'
 import { done } from '@/routes/todos'
 import type { Todo } from '@/types'
@@ -141,21 +142,13 @@ function check (): void {
             >
                 {{ todo.description }}
             </p>
-            <a
+            <ImagePreview
                 v-if="todo.image_url"
-                :href="todo.image_url"
-                target="_blank"
-                rel="noopener"
-                class="mt-2 block w-fit"
-            >
-                <img
-                    :src="todo.image_url"
-                    alt=""
-                    loading="lazy"
-                    class="max-h-40 rounded-xl border-2 border-orange-100 object-contain"
-                    :class="isDone ? 'opacity-50 grayscale' : ''"
-                >
-            </a>
+                :src="todo.image_url"
+                :title="todo.name"
+                fit="contain"
+                :thumb-class="['mt-2 h-32 w-48', isDone ? 'opacity-50 grayscale' : ''].join(' ')"
+            />
         </div>
     </li>
 </template>

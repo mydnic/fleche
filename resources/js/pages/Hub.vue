@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import ImagePreview from '@/components/ImagePreview.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { describeRule } from '@/lib/rule'
 import { hub } from '@/routes'
@@ -135,8 +136,15 @@ const STATUS_COLOR = { pending: 'warning', approved: 'success', rejected: 'error
                     <li
                         v-for="(rule, i) in pack.rules"
                         :key="i"
+                        class="flex items-center gap-2 py-0.5"
                     >
-                        • <b>{{ rule.name }}</b> — {{ describeRule(rule) }}
+                        <ImagePreview
+                            v-if="rule.image_url"
+                            :src="rule.image_url"
+                            :title="rule.name"
+                            thumb-class="size-8"
+                        />
+                        <span>• <b>{{ rule.name }}</b> — {{ describeRule(rule) }}</span>
                     </li>
                 </ul>
                 <div class="flex gap-2">
@@ -209,17 +217,17 @@ const STATUS_COLOR = { pending: 'warning', approved: 'success', rejected: 'error
                     <li
                         v-for="(rule, i) in pack.rules"
                         :key="i"
-                        class="rounded-lg bg-sky-50 px-2 py-1"
+                        class="flex items-center gap-3 rounded-lg bg-sky-50 px-2 py-1.5"
                     >
-                        <img
+                        <ImagePreview
                             v-if="rule.image_url"
                             :src="rule.image_url"
-                            alt=""
-                            loading="lazy"
-                            class="float-right ml-2 size-8 rounded object-cover"
-                        >
-                        <b>{{ rule.name }}</b>
-                        <span class="text-stone-500"> · {{ describeRule(rule) }}</span>
+                            :title="rule.name"
+                        />
+                        <span class="min-w-0">
+                            <b>{{ rule.name }}</b>
+                            <span class="text-stone-500"> · {{ describeRule(rule) }}</span>
+                        </span>
                     </li>
                 </ul>
                 <UButton

@@ -170,21 +170,6 @@ Optional knobs, all in `.env` (every one is documented in `deploy/.env.example`)
 - **Community hub**: self-hosted instances browse and import packs from fleche.io
   (`HUB_URL`). Publishing happens on fleche.io.
 
-### Under the hood
-
-`APP_EDITION=self|cloud` is the one switch between editions. `cloud` adds the
-homepage, the $35 Stripe payment, the 7-day free history and hosts the hub. Same
-code either way.
-
-| Command | When |
-| --- | --- |
-| `fleche:generate [--date=]` | Hourly. Starts the day of every user whose start hour it is, in their timezone: rolls their rules once, then sends their list. `--date=` generates for everyone on that date, without notifications. |
-| `fleche:prune` | 03:00. Cloud only: drops free-tier todos older than 7 days. |
-| `fleche:install` | On boot. Creates the first admin from the environment, once. |
-
-The starter packs live in `database/seeders/HubPackSeeder.php`. Load them on the
-cloud instance with `php artisan db:seed --class=HubPackSeeder` (safe to re-run).
-
 ---
 
 ## API
