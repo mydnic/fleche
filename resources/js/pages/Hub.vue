@@ -106,6 +106,7 @@ const STATUS_COLOR = { pending: 'warning', approved: 'success', rejected: 'error
                     <UCheckbox
                         v-for="rule in rules"
                         :key="rule.id"
+                        :id="`hub-rule-${rule.id}`"
                         :model-value="form.rule_ids.includes(rule.id)"
                         :label="rule.name"
                         @update:model-value="form.rule_ids = form.rule_ids.includes(rule.id) ? form.rule_ids.filter(id => id !== rule.id) : [...form.rule_ids, rule.id]"
