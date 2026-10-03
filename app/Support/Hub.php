@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 /**
  * The community hub lives on the cloud instance. There it is read straight
@@ -88,6 +89,7 @@ class Hub
             // The picture lives on the author's instance: copy it onto ours.
             $user->todoSettings()->create([
                 ...Arr::only($rule, TodoSetting::SHAREABLE),
+                'group' => Str::limit((string) ($pack['name'] ?? ''), 255, '') ?: null,
                 'image' => $images->fetch($rule['image_url'] ?? null),
             ]);
         }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Todo;
+use App\Models\TodoSetting;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 
@@ -60,6 +61,22 @@ it('creates a rule from the form', function () {
     ])->assertRedirect(route('rules.index'));
 
     expect($user->todoSettings()->sole()->days)->toBe(['wednesday']);
+});
+
+it('moves, renames and dissolves rule groups', function () {
+    $user = User::factory()->create();
+    $rule = TodoSetting::factory()->for($user)->create();
+    $other = TodoSetting::factory()->create(['group' => 'Home']);
+
+    $this->actingAs($user)->patch(route('rules.update', $rule), ['group' => 'Home'])->assertSessionHasNoErrors();
+    expect($rule->refresh()->group)->toBe('Home');
+
+    $this->actingAs($user)->put(route('rules.groups'), ['from' => 'Home', 'to' => 'House']);
+    expect($rule->refresh()->group)->toBe('House')
+        ->and($other->refresh()->group)->toBe('Home');
+
+    $this->actingAs($user)->put(route('rules.groups'), ['from' => 'House', 'to' => null]);
+    expect($rule->refresh()->group)->toBeNull();
 });
 
 it('separates today from what is still open from earlier days', function () {

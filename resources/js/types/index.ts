@@ -28,6 +28,7 @@ export type Weekday = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday'
 export interface Rule {
     id?: number
     name: string
+    group?: string | null
     description: string | null
     image_url?: string | null
     active: boolean

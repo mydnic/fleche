@@ -49,6 +49,21 @@ class RuleController extends Controller
         return $request->isMethod('PATCH') ? back() : to_route('rules.index');
     }
 
+    /**
+     * Renames a group across all its rules; a null `to` dissolves it.
+     */
+    public function group(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'from' => ['required', 'string', 'max:255'],
+            'to' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $request->user()->todoSettings()->where('group', $data['from'])->update(['group' => $data['to']]);
+
+        return back();
+    }
+
     public function destroy(Request $request, TodoSetting $rule): RedirectResponse
     {
         $this->authorizeRule($request, $rule);

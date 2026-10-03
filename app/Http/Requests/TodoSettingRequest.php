@@ -23,6 +23,7 @@ class TodoSettingRequest extends FormRequest
 
         return [
             'name' => [...$sometimes, 'required', 'string', 'max:255'],
+            'group' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
             'image' => ['nullable', 'image', 'max:'.Images::MAX_KB],
             'remove_image' => ['boolean'],

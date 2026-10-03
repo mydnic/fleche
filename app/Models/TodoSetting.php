@@ -27,6 +27,7 @@ use Illuminate\Support\Lottery;
  * @property int $id
  * @property int $user_id
  * @property string $name
+ * @property string|null $group free-form label the rules page sorts rules under
  * @property string|null $description
  * @property string|null $image
  * @property bool $active
@@ -46,7 +47,7 @@ use Illuminate\Support\Lottery;
 #[Hidden(['image'])]
 #[Appends(['image_url'])]
 #[Fillable([
-    'name', 'description', 'image', 'active', 'days', 'random_day', 'every_value', 'every_unit',
+    'name', 'group', 'description', 'image', 'active', 'days', 'random_day', 'every_value', 'every_unit',
     'day_of_month', 'months', 'start_after', 'chance', 'allow_duplicates', 'points',
     'reward_cost',
     'user_id',

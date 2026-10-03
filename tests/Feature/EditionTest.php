@@ -95,7 +95,7 @@ it('imports a hub pack and credits its author', function () {
 
     $this->actingAs($importer)->post(route('hub.import', $pack->id))->assertRedirect(route('rules.index'));
 
-    expect($importer->todoSettings()->count())->toBe(2)
+    expect($importer->todoSettings()->pluck('group')->all())->toBe(['Stretching', 'Stretching'])
         ->and($author->refresh()->points)->toBe(10)
         ->and($pack->refresh()->imports_count)->toBe(1);
 });
