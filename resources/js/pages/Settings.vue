@@ -428,7 +428,11 @@ const curl = computed(() => `curl -H "Authorization: Bearer ${props.newToken ?? 
                 >Privacy</a> · <a
                     href="/terms"
                     class="underline"
-                >Terms</a>
+                >Terms</a> · <a
+                    href="https://github.com/mydnic/fleche"
+                    target="_blank"
+                    class="underline"
+                >Open Source</a>
             </p>
         </div>
     </AppLayout>
