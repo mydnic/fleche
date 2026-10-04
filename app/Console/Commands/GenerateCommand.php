@@ -51,7 +51,7 @@ class GenerateCommand extends Command
         $this->info("{$created} todos created for {$users->count()} users in {$local->timezoneName}");
 
         foreach ($users as $user) {
-            $todos = $user->todos()->open()->whereDate('date', '<=', $local->toDateString())->orderBy('date')->get();
+            $todos = $user->todos()->open()->whereDate('date', $local->toDateString())->get();
 
             if ($todos->isNotEmpty()) {
                 $user->notify(new DailyTodos($todos));

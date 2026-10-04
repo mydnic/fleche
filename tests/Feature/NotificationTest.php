@@ -26,10 +26,10 @@ it('starts the day at the user\'s hour: rolls the rules, then sends the list eve
 
     Notification::assertSentTo($user, DailyTodos::class, function (DailyTodos $notification) use ($user) {
         expect($notification->via($user))->toBe(['mail', TelegramChannel::class])
-            ->and($notification->toTelegram($user)->toArray()['text'])->toContain('Everywhere')->toContain('Yesterday')->not->toContain('Done already');
+            ->and($notification->toTelegram($user)->toArray()['text'])->toContain('Everywhere')->not->toContain('Yesterday')->not->toContain('Done already');
 
         // The every-day rule had just rolled: its todo was generated, then sent.
-        return $notification->todos->pluck('name')->sort()->values()->all() === ['Daily stretch', 'Everywhere', 'Yesterday'];
+        return $notification->todos->pluck('name')->sort()->values()->all() === ['Daily stretch', 'Everywhere'];
     });
     Notification::assertCount(1);
 });
