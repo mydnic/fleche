@@ -16,7 +16,29 @@ const draftGroups = ref<string[]>([])
 const groups = computed(() => [...new Set([...props.rules.map(r => r.group).filter((g): g is string => !!g), ...draftGroups.value])]
     .sort((a, b) => a.localeCompare(b)))
 const sections = computed(() => [...groups.value, null])
+// The real contents of a group, filter or no filter: what the server acts on.
 const inGroup = (group: string | null) => props.rules.filter(r => (r.group ?? null) === group)
+
+// Everything the page needs is already in props, so the search never leaves the browser.
+const query = ref('')
+// Case and accents folded away, so "maison" finds "Maison" and "Café" finds "cafe".
+const fold = (text: string) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+const terms = computed(() => fold(query.value).split(/\s+/).filter(Boolean))
+const searching = computed(() => !!terms.value.length)
+const visibleRules = computed(() => {
+    if (!terms.value.length) {
+        return props.rules
+    }
+
+    return props.rules.filter(rule => {
+        // describeRule() is the sentence already shown under the rule, so "every Tuesday" is searchable.
+        const haystack = fold([rule.name, rule.group, rule.description, describeRule(rule)].filter(Boolean).join(' '))
+
+        return terms.value.every(term => haystack.includes(term))
+    })
+})
+// What a group shows on screen, which is all of it until something is typed.
+const visibleInGroup = (group: string | null) => visibleRules.value.filter(r => (r.group ?? null) === group)
 
 const dragged = ref<SavedRule | null>(null)
 const over = ref<string | null | undefined>(undefined)
@@ -35,7 +57,9 @@ watch(collapsed, value => {
         localStorage.setItem('rules.collapsed', JSON.stringify(value))
     } catch {}
 })
-const isCollapsed = (group: string | null) => collapsed.value.includes(group ?? '')
+// A collapsed group would hide a hit and make the search look broken, so a live
+// query forces everything open. The saved state is untouched and comes back on clear.
+const isCollapsed = (group: string | null) => !searching.value && collapsed.value.includes(group ?? '')
 const allCollapsed = computed(() => sections.value.filter(g => g !== null || inGroup(null).length).every(isCollapsed))
 
 function toggleCollapse (group: string | null): void {
@@ -136,6 +160,31 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
             />
         </section>
 
+        <UInput
+            v-if="rules.length"
+            v-model="query"
+            icon="i-lucide-search"
+            placeholder="Search rules: bins, Tuesday, 1 in 3…"
+            size="xl"
+            class="mb-6 w-full"
+            aria-label="Search rules"
+            @keydown.esc="query = ''"
+        >
+            <template
+                v-if="query"
+                #trailing
+            >
+                <UButton
+                    icon="i-lucide-x"
+                    color="neutral"
+                    variant="link"
+                    size="sm"
+                    aria-label="Clear search"
+                    @click="query = ''"
+                />
+            </template>
+        </UInput>
+
         <div
             v-if="!rules.length"
             class="rounded-3xl border-2 border-dashed border-orange-200 bg-white/70 p-10 text-center"
@@ -149,11 +198,23 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
         </div>
 
         <div
-            v-if="rules.length"
+            v-if="rules.length && !visibleRules.length"
+            class="rounded-3xl border-2 border-dashed border-orange-200 bg-white/70 p-10 text-center"
+        >
+            <p class="font-display text-xl font-semibold">
+                No rule matches "{{ query.trim() }}"
+            </p>
+            <p class="mt-1 text-sm text-stone-500">
+                Names, groups, descriptions and schedules are all searched. Try a shorter word, or clear the search.
+            </p>
+        </div>
+
+        <div
+            v-if="visibleRules.length"
             class="flex flex-col gap-6"
         >
             <UButton
-                v-if="groups.length"
+                v-if="groups.length && !searching"
                 :icon="allCollapsed ? 'i-lucide-chevrons-up-down' : 'i-lucide-chevrons-down-up'"
                 :label="allCollapsed ? 'Expand all' : 'Collapse all'"
                 color="neutral"
@@ -167,7 +228,7 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                 :key="group ?? ''"
             >
                 <section
-                    v-if="group !== null || inGroup(null).length || (dragged && groups.length)"
+                    v-if="searching ? visibleInGroup(group).length : (group !== null || inGroup(null).length || (dragged && groups.length))"
                     class="rounded-3xl border-2 border-dashed p-3 transition"
                     :class="over === group && dragged ? 'border-orange-300 bg-orange-50/60' : 'border-transparent'"
                     @dragover.prevent="dragged && (over = group)"
@@ -181,9 +242,11 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                     >
                         <button
                             type="button"
-                            class="flex shrink-0 items-center gap-1 text-orange-400 hover:text-orange-600"
+                            class="flex shrink-0 items-center gap-1 text-orange-400 hover:text-orange-600 disabled:cursor-default disabled:hover:text-orange-400"
+                            :disabled="searching"
                             :aria-expanded="!isCollapsed(group)"
                             :aria-label="`${isCollapsed(group) ? 'Expand' : 'Collapse'} ${group ?? 'No group'}`"
+                            :title="searching ? 'Groups stay open while you search' : undefined"
                             @click="toggleCollapse(group)"
                         >
                             <UIcon
@@ -220,7 +283,7 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                             v-else
                             class="font-display text-lg font-semibold text-stone-500"
                         >No group</span>
-                        <span class="text-sm text-stone-400">{{ inGroup(group).length }}</span>
+                        <span class="text-sm text-stone-400">{{ visibleInGroup(group).length }}</span>
                         <UButton
                             v-if="group !== null"
                             icon="i-lucide-x"
@@ -235,7 +298,7 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                     </header>
                     <template v-if="groups.length && isCollapsed(group)" />
                     <p
-                        v-else-if="!inGroup(group).length"
+                        v-else-if="!visibleInGroup(group).length"
                         class="rounded-2xl border-2 border-dashed border-stone-200 p-6 text-center text-sm text-stone-400"
                     >
                         Drag rules here
@@ -245,11 +308,15 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                         class="grid gap-3 sm:grid-cols-2"
                     >
                         <li
-                            v-for="rule in inGroup(group)"
+                            v-for="rule in visibleInGroup(group)"
                             :key="rule.id"
-                            draggable="true"
-                            class="pop flex cursor-grab flex-col gap-2 rounded-2xl border-2 bg-white p-4 transition active:cursor-grabbing"
-                            :class="[rule.active ? 'border-orange-100' : 'border-stone-100 opacity-60', dragged?.id === rule.id && 'scale-95 opacity-40']"
+                            :draggable="!searching"
+                            class="pop flex flex-col gap-2 rounded-2xl border-2 bg-white p-4 transition"
+                            :class="[
+                                rule.active ? 'border-orange-100' : 'border-stone-100 opacity-60',
+                                dragged?.id === rule.id && 'scale-95 opacity-40',
+                                !searching && 'cursor-grab active:cursor-grabbing',
+                            ]"
                             @dragstart="dragged = rule; $event.dataTransfer!.effectAllowed = 'move'"
                             @dragend="dragged = null; over = undefined"
                         >
