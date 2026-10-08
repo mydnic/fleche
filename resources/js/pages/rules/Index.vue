@@ -85,6 +85,18 @@ function move (rule: SavedRule, group: string | null): void {
     }
 }
 
+// The rule title is an <a href>, which HTML makes draggable on its own, and draggable
+// isn't inherited: without cancelling here, grabbing the title would still start a drag
+// that this handler turns into a move, under an active filter.
+function dragStart (event: DragEvent, rule: SavedRule): void {
+    if (searching.value) {
+        event.preventDefault()
+        return
+    }
+    dragged.value = rule
+    event.dataTransfer!.effectAllowed = 'move'
+}
+
 function drop (group: string | null): void {
     if (dragged.value) {
         move(dragged.value, group)
@@ -317,7 +329,7 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                                 dragged?.id === rule.id && 'scale-95 opacity-40',
                                 !searching && 'cursor-grab active:cursor-grabbing',
                             ]"
-                            @dragstart="dragged = rule; $event.dataTransfer!.effectAllowed = 'move'"
+                            @dragstart="dragStart($event, rule)"
                             @dragend="dragged = null; over = undefined"
                         >
                             <div class="flex items-start justify-between gap-2">
@@ -380,6 +392,7 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                 </section>
             </template>
             <UButton
+                v-if="!searching"
                 icon="i-lucide-folder-plus"
                 color="neutral"
                 variant="soft"
