@@ -32,10 +32,12 @@ it('keeps web routes to the owner', function () {
     $this->put(route('rules.update', $this->rule), ['name' => 'pwned'])->assertNotFound();
     $this->patch(route('rules.update', $this->rule), ['active' => false])->assertNotFound();
     $this->delete(route('rules.destroy', $this->rule))->assertNotFound();
+    $this->post(route('rules.duplicate', $this->rule))->assertNotFound();
 
     expect($this->todo->refresh()->done_at)->toBeNull()
         ->and($this->rule->refresh()->name)->toBe('Victim rule')
         ->and($this->rule->active)->toBeTrue()
+        ->and($this->victim->todoSettings()->count())->toBe(1)
         ->and($this->victim->refresh()->points)->toBe(0);
 });
 

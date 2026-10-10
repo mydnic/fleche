@@ -139,6 +139,18 @@ function dissolve (group: string): void {
     }
 }
 
+// No preserveScroll: the copy's edit form is where this lands.
+function duplicate (rule: SavedRule): void {
+    router.post(ruleRoutes.duplicate.url(rule.id))
+}
+
+function actionItems (rule: SavedRule): DropdownMenuItem[][] {
+    return [
+        [{ label: 'Duplicate', icon: 'i-lucide-copy', onSelect: () => duplicate(rule) }],
+        ...moveItems(rule),
+    ]
+}
+
 function moveItems (rule: SavedRule): DropdownMenuItem[][] {
     return [
         [
@@ -340,13 +352,13 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                                     {{ rule.name }}
                                 </Link>
                                 <div class="flex shrink-0 items-center gap-1">
-                                    <UDropdownMenu :items="moveItems(rule)">
+                                    <UDropdownMenu :items="actionItems(rule)">
                                         <UButton
-                                            icon="i-lucide-folder-input"
+                                            icon="i-lucide-ellipsis"
                                             color="neutral"
                                             variant="ghost"
                                             size="xs"
-                                            :aria-label="`Move ${rule.name} to a group`"
+                                            :aria-label="`Actions for ${rule.name}`"
                                         />
                                     </UDropdownMenu>
                                     <USwitch

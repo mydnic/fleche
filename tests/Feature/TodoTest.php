@@ -63,6 +63,43 @@ it('creates a rule from the form', function () {
     expect($user->todoSettings()->sole()->days)->toBe(['wednesday']);
 });
 
+it('duplicates a rule, todos excluded, onto the copy\'s own form', function () {
+    $user = User::factory()->create();
+    $rule = TodoSetting::factory()->for($user)->create([
+        'name' => 'Trash',
+        'group' => 'Home',
+        'image' => 'rules/bin.jpg',
+        'days' => ['wednesday'],
+        'chance' => 0.5,
+        'points' => 2,
+        'active' => false,
+    ]);
+    Todo::factory()->for($user)->create(['todo_setting_id' => $rule->id]);
+    $copied = ['group', 'image', 'days', 'chance', 'points', 'active'];
+
+    $response = $this->actingAs($user)->post(route('rules.duplicate', $rule));
+    $copy = $user->todoSettings()->whereKeyNot($rule->id)->sole();
+
+    $response->assertRedirect(route('rules.edit', $copy));
+    expect($copy->name)->toBe('Trash (copy)')
+        ->and($copy->only($copied))->toBe($rule->only($copied))
+        ->and($copy->todos()->count())->toBe(0);
+
+    // The name is already taken, so the next copy counts up.
+    $this->actingAs($user)->post(route('rules.duplicate', $rule));
+    expect($user->todoSettings()->pluck('name')->all())->toContain('Trash (copy 2)');
+});
+
+it('keeps a duplicated name inside the column', function () {
+    $user = User::factory()->create();
+    $rule = TodoSetting::factory()->for($user)->create(['name' => str_repeat('a', 255)]);
+
+    $this->actingAs($user)->post(route('rules.duplicate', $rule));
+
+    expect($user->todoSettings()->whereKeyNot($rule->id)->sole()->name)
+        ->toBe(str_repeat('a', 248).' (copy)');
+});
+
 it('moves, renames and dissolves rule groups', function () {
     $user = User::factory()->create();
     $rule = TodoSetting::factory()->for($user)->create();

@@ -45,6 +45,7 @@ Route::prefix('app')->group(function (): void {
         Route::post('todos/{todo}/done', [TodoController::class, 'done'])->name('todos.done');
 
         Route::put('rules/groups', [RuleController::class, 'group'])->name('rules.groups');
+        Route::post('rules/{rule}/duplicate', [RuleController::class, 'duplicate'])->name('rules.duplicate');
         Route::resource('rules', RuleController::class)->except('show');
 
         Route::get('stats', [StatsController::class, 'index'])->name('stats');

@@ -6,6 +6,7 @@ use App\Http\Requests\TodoSettingRequest;
 use App\Models\TodoSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -47,6 +48,39 @@ class RuleController extends Controller
         $rule->update($request->payload());
 
         return $request->isMethod('PATCH') ? back() : to_route('rules.index');
+    }
+
+    /**
+     * Copies a rule, todos excluded, and opens the copy's form. The copy stays
+     * active: pausing it is one switch away on the form it lands on.
+     */
+    public function duplicate(Request $request, TodoSetting $rule): RedirectResponse
+    {
+        $this->authorizeRule($request, $rule);
+
+        $copy = $rule->replicate();
+        $copy->name = $this->copyName($request, $rule->name);
+        $copy->save();
+
+        return to_route('rules.edit', $copy);
+    }
+
+    /**
+     * "X (copy)", then "X (copy 2)" and up until the user has no such rule
+     * yet. The suffix eats into the name: `name` stops at 255 characters.
+     */
+    private function copyName(Request $request, string $name): string
+    {
+        $taken = $request->user()->todoSettings()->pluck('name')->all();
+        $i = 1;
+
+        do {
+            $suffix = $i === 1 ? ' (copy)' : " (copy {$i})";
+            $candidate = Str::limit($name, 255 - strlen($suffix), '').$suffix;
+            $i++;
+        } while (in_array($candidate, $taken, true));
+
+        return $candidate;
     }
 
     /**
