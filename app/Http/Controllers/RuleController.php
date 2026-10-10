@@ -35,14 +35,14 @@ class RuleController extends Controller
 
     public function edit(Request $request, TodoSetting $rule): Response
     {
-        $this->authorizeRule($request, $rule);
+        abort_unless($rule->user_id === $request->user()->id, 404);
 
         return Inertia::render('rules/Form', ['rule' => $rule]);
     }
 
     public function update(TodoSettingRequest $request, TodoSetting $rule): RedirectResponse
     {
-        $this->authorizeRule($request, $rule);
+        abort_unless($rule->user_id === $request->user()->id, 404);
 
         $rule->update($request->payload());
 
@@ -66,15 +66,10 @@ class RuleController extends Controller
 
     public function destroy(Request $request, TodoSetting $rule): RedirectResponse
     {
-        $this->authorizeRule($request, $rule);
+        abort_unless($rule->user_id === $request->user()->id, 404);
 
         $rule->delete();
 
         return to_route('rules.index');
-    }
-
-    private function authorizeRule(Request $request, TodoSetting $rule): void
-    {
-        abort_unless($rule->user_id === $request->user()->id, 404);
     }
 }
