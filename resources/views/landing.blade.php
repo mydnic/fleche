@@ -39,6 +39,9 @@
                     <a href="{{ auth()->check() ? '/app' : '/app/register' }}" class="rounded-2xl border-2 border-orange-500 bg-orange-500 px-4 py-3 text-center text-lg font-bold text-white shadow-[0_4px_0_0_#c2410c] hover:bg-orange-600">{{ auth()->check() ? 'Open my todos' : 'Start free' }} 🏹</a>
                     <a href="https://github.com/mydnic/fleche" class="rounded-2xl border-2 border-stone-200 bg-white px-4 py-3 text-center text-lg font-bold shadow-[0_4px_0_0_rgb(0_0_0/0.06)] hover:border-orange-300">Self-host it</a>
                 </div>
+                @guest
+                    <p class="mt-3 text-sm text-stone-500">Free account, no card. Next: write your first rule or import a ready-made pack.</p>
+                @endguest
             </div>
 
             {{-- Playable sample: resources/js/components/LandingDemo.vue. --}}
@@ -48,7 +51,7 @@
         <section class="mx-auto grid max-w-5xl gap-4 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ([
                 ['📅', 'Rules, not reminders', 'Specific weekdays, every N weeks, the last day of the month, once a quarter, not before a date…'],
-                ['🎲', 'A pinch of chance', '"1 in 7" means about once a week, never on the same day. Habits that stay fresh.'],
+                ['🎲', 'A pinch of chance', '"1 in 7" rolls a die every day: about once a week, on no fixed day. Back-to-back days can happen. Need a gap? Add "at most every 3 days".'],
                 ['⭐', 'Points & rewards', 'Earn points for every hit. Spend them on reward rules that only appear when you can afford them. Optional.'],
                 ['🏪', 'Community packs', 'Import rule packs from other people in one click. Share yours, earn points when others import.'],
             ] as [$emoji, $title, $body])

@@ -289,7 +289,7 @@ function destroy (): void {
                     🎲 Chance
                 </h2>
                 <p class="text-sm text-stone-500">
-                    On a matching day, roll the dice. Great for surprises.
+                    Every matching day gets its own roll, so back-to-back days can happen. Need a gap? Use "At most every" above: no roll until it's been that long since you last did it.
                 </p>
                 <div class="flex flex-wrap items-center gap-2">
                     <button

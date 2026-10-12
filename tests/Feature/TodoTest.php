@@ -146,3 +146,12 @@ it('lists what was done on a picked day, in the user\'s timezone', function () {
 
     $this->actingAs($user)->get(route('today', ['done_on' => '2026-10-05']))->assertSessionHasErrors('done_on');
 });
+
+it('tells free cloud accounts when their old todos get deleted', function () {
+    $this->actingAs(User::factory()->create())->get(route('today'))->assertInertia(fn ($page) => $page->where('freeDays', null)->where('hasRules', false));
+
+    bootWithEnv(['APP_EDITION' => 'cloud']);
+
+    $this->actingAs(User::factory()->create())->get(route('today'))->assertInertia(fn ($page) => $page->where('freeDays', 7));
+    $this->actingAs(User::factory()->create(['paid_at' => now()]))->get(route('today'))->assertInertia(fn ($page) => $page->where('freeDays', null));
+});
