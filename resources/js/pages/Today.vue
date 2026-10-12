@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Form, Head, router, usePage } from '@inertiajs/vue3'
+import { Form, Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import PixelArcher from '@/components/PixelArcher.vue'
 import TodoItem from '@/components/TodoItem.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { today as todayRoute } from '@/routes'
+import { hub, today as todayRoute } from '@/routes'
+import rules from '@/routes/rules'
 import { store } from '@/routes/todos'
 import type { Todo } from '@/types'
 
@@ -17,6 +18,8 @@ const props = defineProps<{
     done: Todo[]
     doneTodayCount: number
     hasDoneEver: boolean
+    hasRules: boolean
+    freeDays: number | null
 }>()
 
 const page = usePage()
@@ -52,10 +55,25 @@ const overdueByDay = computed(() => {
     return [...groups].map(([date, todos]) => ({ date, todos }))
 })
 
+function daysAgo (date: string): number {
+    return Math.round((new Date(props.today + 'T12:00:00').getTime() - new Date(date + 'T12:00:00').getTime()) / 86_400_000)
+}
+
 function dayLabel (date: string): string {
-    const days = Math.round((new Date(props.today + 'T12:00:00').getTime() - new Date(date + 'T12:00:00').getTime()) / 86_400_000)
+    const days = daysAgo(date)
 
     return days === 1 ? 'Yesterday' : `${niceDate(date)} · ${days} days ago`
+}
+
+/** Free cloud plan: warn in the last 2 days before the nightly prune deletes them. */
+function deletionLabel (date: string): string | null {
+    if (props.freeDays === null) {
+        return null
+    }
+
+    const left = props.freeDays + 1 - daysAgo(date)
+
+    return left > 2 ? null : left <= 1 ? 'deleted tomorrow' : `deleted in ${left} days`
 }
 
 /** Swaps only the "done" list, keeping the rest of the page and the scroll. */
@@ -92,6 +110,9 @@ function niceDate (date: string): string {
                     <template v-else-if="doneTodayCount">
                         Bullseye. Everything's done for today 🎯
                     </template>
+                    <template v-else-if="!hasRules">
+                        No rules yet, so nothing to aim at.
+                    </template>
                     <template v-else>
                         Nothing today. The dice were kind.
                     </template>
@@ -108,6 +129,36 @@ function niceDate (date: string): string {
                 @click="adding = !adding"
             />
         </section>
+
+        <div
+            v-if="!hasRules"
+            class="pop mb-6 rounded-3xl border-2 border-dashed border-orange-200 bg-white/70 p-8 text-center"
+        >
+            <p class="font-display text-xl font-semibold">
+                Your list fills itself from rules
+            </p>
+            <p class="mx-auto mt-1 max-w-md text-sm text-stone-500">
+                Write one like "Bins out every Tuesday", or import a ready-made pack. Tomorrow morning, your todos are waiting.
+            </p>
+            <div class="mt-5 flex flex-wrap justify-center gap-3">
+                <Link :href="rules.create.url()">
+                    <UButton
+                        size="lg"
+                        icon="i-lucide-dices"
+                        label="Write a rule"
+                    />
+                </Link>
+                <Link :href="hub.url()">
+                    <UButton
+                        size="lg"
+                        color="neutral"
+                        variant="outline"
+                        icon="i-lucide-store"
+                        label="Browse packs"
+                    />
+                </Link>
+            </div>
+        </div>
 
         <div
             v-if="open.length + doneTodayCount > 0"
@@ -199,8 +250,13 @@ function niceDate (date: string): string {
                     v-for="group in overdueByDay"
                     :key="group.date"
                 >
-                    <p class="mb-2 text-xs font-extrabold tracking-wide text-amber-600 uppercase">
+                    <p class="mb-2 flex items-center gap-2 text-xs font-extrabold tracking-wide text-amber-600 uppercase">
                         {{ dayLabel(group.date) }}
+                        <span
+                            v-if="deletionLabel(group.date)"
+                            class="rounded-full bg-red-100 px-2 py-0.5 text-[0.65rem] tracking-normal text-red-600 normal-case"
+                            :title="`Free plan: todos older than ${freeDays} days are deleted, done or not.`"
+                        >🗑 {{ deletionLabel(group.date) }}</span>
                     </p>
                     <ul class="space-y-2">
                         <TodoItem
