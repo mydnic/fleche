@@ -133,7 +133,7 @@ shell alias, your fridge. See [API](#api).
 |---|---|---|---|
 | Rules, chance, points, rewards, hub | ✅ | ✅ | ✅ |
 | Email & Telegram | ✅ | ✅ | ✅ (bring your own) |
-| History | last 7 days | **forever** | forever |
+| History | todos older than 7 days deleted (done or not) | **forever** | forever |
 | Price | $0 | **$35 once.** No subscription, ever. | free, your server |
 
 <img src="docs/screenshots/landing.png" alt="The fleche.io homepage" width="800">

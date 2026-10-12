@@ -27,7 +27,7 @@
 
     <h2>3. Plans and payment</h2>
     <h3>Free plan</h3>
-    <p>Everything Fleche does, with one limit: todos older than 7 days are deleted automatically.</p>
+    <p>Everything Fleche does, with one limit: todos older than 7 days are deleted automatically, whether done or not.</p>
     <h3>Lifetime plan</h3>
     <ul>
         <li>A one-time payment of <strong>$35</strong>, processed by Stripe. The amount shown at checkout is the amount you pay. No subscription, no renewal.</li>

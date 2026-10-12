@@ -154,7 +154,7 @@ const topMax = computed(() => Math.max(1, ...props.topRules.map(rule => rule.hit
                             :style="{ width: lockedWidth }"
                         >
                             <p class="mx-4 max-w-xs text-center text-sm text-stone-400">
-                                The free plan only keeps your last {{ freeDays }} days.
+                                The free plan deletes todos older than {{ freeDays }} days.
                                 <button
                                     type="button"
                                     class="font-semibold text-orange-600 underline decoration-orange-200 underline-offset-2 hover:decoration-orange-500"

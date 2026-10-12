@@ -107,7 +107,7 @@
                     <h3 class="text-xl font-bold">Free</h3>
                     <p class="mt-1 text-3xl font-bold">$0</p>
                     <ul class="mt-4 space-y-2 text-sm text-stone-600">
-                        <li>✓ Unlimited rules & todos</li><li>✓ Points, rewards, hub</li><li>✓ Email & Telegram</li><li>⏳ History kept 7 days</li>
+                        <li>✓ Unlimited rules & todos</li><li>✓ Points, rewards, hub</li><li>✓ Email & Telegram</li><li>⏳ Todos older than 7 days are deleted, done or not</li>
                     </ul>
                     <a href="{{ auth()->check() ? '/app' : '/app/register' }}" class="mt-6 block rounded-2xl border-2 border-orange-200 py-2.5 text-center font-bold hover:bg-orange-50">{{ auth()->check() ? 'Open app' : 'Start free' }}</a>
                 </div>
@@ -137,6 +137,6 @@
         </section>
     </main>
 
-    <footer class="py-10 text-center text-sm text-stone-400">Fleche · made with 🏹 by <a href="https://mydnic.be" class="underline">mydnic</a> · <a href="/privacy" class="underline">Privacy</a> · <a href="/terms" class="underline">Terms</a></footer>
+    <footer class="py-10 text-center text-sm text-stone-400">Fleche · made with 🏹 by <a href="https://mydnic.be" class="underline">mydnic</a> · <a href="/privacy" class="underline">Privacy</a> · <a href="/terms" class="underline">Terms</a> · <a href="mailto:rigoclement@mydnic.be" class="underline">Contact</a></footer>
 </body>
 </html>

@@ -87,7 +87,7 @@ const curl = computed(() => `curl -H "Authorization: Bearer ${props.newToken ?? 
                         Keep your history forever
                     </h2>
                     <p class="mb-3 text-sm text-stone-600">
-                        On the free plan, past todos are cleared after 7 days. One payment of $35, no subscription, unlimited history forever.
+                        On the free plan, todos older than 7 days are deleted, whether done or not. One payment of $35, no subscription, unlimited history forever.
                     </p>
                     <UButton
                         size="lg"
@@ -433,6 +433,11 @@ const curl = computed(() => `curl -H "Authorization: Bearer ${props.newToken ?? 
                     target="_blank"
                     class="underline"
                 >Open Source</a>
+                <br>
+                Need help? <a
+                    href="mailto:rigoclement@mydnic.be"
+                    class="underline"
+                >rigoclement@mydnic.be</a>
             </p>
         </div>
     </AppLayout>

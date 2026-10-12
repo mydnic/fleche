@@ -87,7 +87,7 @@
     <h2>How long we keep it</h2>
     <ul>
         <li><strong>Your account and content</strong>: as long as you have an account.</li>
-        <li><strong>Free plan</strong>: todos older than 7 days are deleted automatically. The lifetime plan keeps your history.</li>
+        <li><strong>Free plan</strong>: todos older than 7 days (done or not) are deleted automatically. The lifetime plan keeps your history.</li>
         <li><strong>When you delete your account</strong>: your account, rules, todos, pictures and API keys are deleted immediately. Copies in backups disappear as backups rotate, within 30 days.</li>
         <li><strong>Server logs and error reports</strong>: up to 30 days.</li>
         <li><strong>Usage statistics</strong>: up to 2 years.</li>
