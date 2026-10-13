@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\HubPackStatus;
 use App\Models\HubPack;
 use App\Models\Todo;
+use App\Models\TodoSetting;
 use App\Models\User;
 use App\Providers\AppServiceProvider;
 use Database\Seeders\HubPackSeeder;
@@ -216,6 +218,31 @@ it('lets only the cloud admin remove a pack from the hub', function () {
 
     $this->actingAs($admin)->delete(route('hub.destroy', $pack))->assertRedirect();
     expect(HubPack::count())->toBe(0);
+});
+
+it('offers the rules list a one-rule publish on cloud only', function () {
+    $user = User::factory()->create();
+    $rule = TodoSetting::factory()->for($user)->create(['name' => 'Water the plants']);
+
+    $this->actingAs($user)->get(route('rules.index'))->assertInertia(fn ($page) => $page->where('canPublish', false));
+    $this->actingAs($user)->post(route('hub.publish'), ['name' => 'Water the plants', 'rule_ids' => [$rule->id]])->assertNotFound();
+
+    bootWithEnv(['APP_EDITION' => 'cloud']);
+
+    $user = User::factory()->create();
+    $rule = TodoSetting::factory()->for($user)->create(['name' => 'Water the plants']);
+
+    $this->actingAs($user)->get(route('rules.index'))->assertInertia(fn ($page) => $page->where('canPublish', true));
+
+    $this->actingAs($user)->post(route('hub.publish'), ['name' => 'Green thumb', 'description' => 'One plant at a time.', 'rule_ids' => [$rule->id]])
+        ->assertRedirect(route('rules.index'))
+        ->assertSessionHas('status', 'Sent for review. It will appear once approved.');
+
+    $pack = HubPack::sole();
+
+    expect($pack->name)->toBe('Green thumb')
+        ->and($pack->status)->toBe(HubPackStatus::Pending)
+        ->and(array_column($pack->rules, 'name'))->toBe(['Water the plants']);
 });
 
 it('never lets a self-hosted admin delete packs', function () {
