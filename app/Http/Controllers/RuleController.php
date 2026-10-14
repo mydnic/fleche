@@ -18,6 +18,8 @@ class RuleController extends Controller
     {
         return Inertia::render('rules/Index', [
             'rules' => $request->user()->todoSettings()->orderByDesc('active')->orderBy('name')->get(),
+            // Publishing is a cloud-only endpoint, so the shortcut has to hide itself elsewhere.
+            'canPublish' => config('fleche.edition') === 'cloud',
         ]);
     }
 

@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { computed, ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { describeChance, describeRule } from '@/lib/rule'
+import { publish } from '@/routes/hub'
 import ruleRoutes from '@/routes/rules'
 import type { Rule } from '@/types'
 
 type SavedRule = Rule & { id: number }
 
-const props = defineProps<{ rules: SavedRule[] }>()
+const props = defineProps<{ rules: SavedRule[], canPublish: boolean }>()
 
 // Groups only live on rules: a fresh one stays client-side until a rule lands in it.
 const draftGroups = ref<string[]>([])
@@ -144,9 +145,32 @@ function duplicate (rule: SavedRule): void {
     router.post(ruleRoutes.duplicate.url(rule.id))
 }
 
+// A pack of one is still a pack, so this posts to the hub's own publish endpoint.
+// The rule's name and description only prefill the form: what reads fine in your
+// own list is rarely what a stranger browsing the hub needs to see.
+const sharing = ref<SavedRule | null>(null)
+const shareOpen = ref(false)
+const share = useForm({ name: '', description: '', rule_ids: [] as number[] })
+
+function startShare (rule: SavedRule): void {
+    sharing.value = rule
+    share.name = rule.name
+    share.description = rule.description ?? ''
+    share.rule_ids = [rule.id]
+    share.clearErrors()
+    shareOpen.value = true
+}
+
+function send (): void {
+    share.post(publish.url(), { preserveScroll: true, onSuccess: () => (shareOpen.value = false) })
+}
+
 function actionItems (rule: SavedRule): DropdownMenuItem[][] {
     return [
-        [{ label: 'Duplicate', icon: 'i-lucide-copy', onSelect: () => duplicate(rule) }],
+        [
+            { label: 'Duplicate', icon: 'i-lucide-copy', onSelect: () => duplicate(rule) },
+            ...(props.canPublish ? [{ label: 'Publish on hub', icon: 'i-lucide-upload', onSelect: () => startShare(rule) }] : []),
+        ],
         ...moveItems(rule),
     ]
 }
@@ -413,6 +437,66 @@ function moveItems (rule: SavedRule): DropdownMenuItem[][] {
                 @click="newGroup()"
             />
         </div>
+
+        <UModal
+            v-model:open="shareOpen"
+            :ui="{ content: 'max-w-md' }"
+        >
+            <template #content>
+                <form
+                    class="flex flex-col gap-3 p-6"
+                    @submit.prevent="send"
+                >
+                    <h2 class="font-display text-xl font-semibold">
+                        Share "{{ sharing?.name }}" on the hub
+                    </h2>
+                    <p class="-mt-2 text-sm text-stone-500">
+                        It goes up as a pack of one rule. Anyone can import it and tweak their copy.
+                    </p>
+                    <UFormField
+                        label="Pack name"
+                        :error="share.errors.name"
+                    >
+                        <UInput
+                            v-model="share.name"
+                            autofocus
+                            class="w-full"
+                        />
+                    </UFormField>
+                    <UFormField
+                        label="Description"
+                        :error="share.errors.description"
+                    >
+                        <UTextarea
+                            v-model="share.description"
+                            :rows="2"
+                            placeholder="What it is good for."
+                            class="w-full"
+                        />
+                    </UFormField>
+                    <p class="text-xs text-stone-500">
+                        Packs are reviewed by a human before they go public.
+                    </p>
+                    <div class="mt-2 flex w-full gap-2">
+                        <UButton
+                            label="Cancel"
+                            color="neutral"
+                            variant="soft"
+                            block
+                            @click="shareOpen = false"
+                        />
+                        <UButton
+                            type="submit"
+                            label="Submit for review"
+                            color="secondary"
+                            icon="i-lucide-upload"
+                            :loading="share.processing"
+                            block
+                        />
+                    </div>
+                </form>
+            </template>
+        </UModal>
 
         <UModal
             v-model:open="confirmOpen"
